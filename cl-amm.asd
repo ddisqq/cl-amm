@@ -6,7 +6,7 @@
 (asdf:defsystem #:cl-amm
   :name "cl-amm"
   :version "0.1.0"
-  :author "Parkian Company LLC"
+  :author "Park Ian Co"
   :license "Apache-2.0"
   :description "Constant Product Automated Market Maker (x*y=k)"
   :long-description "A standalone Common Lisp implementation of an Automated Market Maker
@@ -16,15 +16,16 @@ fee collection, and swap execution with slippage protection."
   :serial t
   :components ((:file "package")
                (:module "src"
-                :serial t
-                :components ((:file "types")
-                             (:file "amm"))))
+                :components ((:file "package")
+                             (:file "conditions" :depends-on ("package"))
+                             (:file "types" :depends-on ("package"))
+                             (:file "cl-amm" :depends-on ("package" "conditions" "types"))))))
   :in-order-to ((asdf:test-op (test-op #:cl-amm/test))))
 
 (asdf:defsystem #:cl-amm/test
-  :name "cl-amm/test"
+  :name "cl-amm"
   :version "0.1.0"
-  :author "Parkian Company LLC"
+  :author "Park Ian Co"
   :license "Apache-2.0"
   :description "Tests for cl-amm"
   :depends-on (#:cl-amm)
