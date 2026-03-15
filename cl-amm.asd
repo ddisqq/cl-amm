@@ -7,7 +7,7 @@
   :name "cl-amm"
   :version "0.1.0"
   :author "Parkian Company LLC"
-  :license "BSD-3-Clause"
+  :license "Apache-2.0"
   :description "Constant Product Automated Market Maker (x*y=k)"
   :long-description "A standalone Common Lisp implementation of an Automated Market Maker
 using the constant product formula. Supports liquidity pools, LP token minting/burning,
@@ -25,7 +25,7 @@ fee collection, and swap execution with slippage protection."
   :name "cl-amm/test"
   :version "0.1.0"
   :author "Parkian Company LLC"
-  :license "BSD-3-Clause"
+  :license "Apache-2.0"
   :description "Tests for cl-amm"
   :depends-on (#:cl-amm)
   :serial t
