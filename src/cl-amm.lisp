@@ -77,3 +77,38 @@
 (define-condition pool-not-found-error (cl-amm-error) ())
 (define-condition pool-exists-error (cl-amm-error) ())
 (define-condition zero-liquidity-error (cl-amm-error) ())
+
+
+;;; ============================================================================
+;;; Standard Toolkit for cl-amm
+;;; ============================================================================
+
+(defmacro with-amm-timing (&body body)
+  "Executes BODY and logs the execution time specific to cl-amm."
+  (let ((start (gensym))
+        (end (gensym)))
+    `(let ((,start (get-internal-real-time)))
+       (multiple-value-prog1
+           (progn ,@body)
+         (let ((,end (get-internal-real-time)))
+           (format t "~&[cl-amm] Execution time: ~A ms~%"
+                   (/ (* (- ,end ,start) 1000.0) internal-time-units-per-second)))))))
+
+(defun amm-batch-process (items processor-fn)
+  "Applies PROCESSOR-FN to each item in ITEMS, handling errors resiliently.
+Returns (values processed-results error-alist)."
+  (let ((results nil)
+        (errors nil))
+    (dolist (item items)
+      (handler-case
+          (push (funcall processor-fn item) results)
+        (error (e)
+          (push (cons item e) errors))))
+    (values (nreverse results) (nreverse errors))))
+
+(defun amm-health-check ()
+  "Performs a basic health check for the cl-amm module."
+  (let ((ctx (initialize-amm)))
+    (if (validate-amm ctx)
+        :healthy
+        :degraded)))
