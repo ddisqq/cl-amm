@@ -6,7 +6,11 @@
 (defpackage #:cl-amm
   (:use #:cl)
   (:export
-   #:with-amm-timing
+   #:identity-list
+   #:flatten
+   #:map-keys
+   #:now-timestamp
+#:with-amm-timing
    #:amm-batch-process
    #:amm-health-check;;; ===================================================================
    ;;; Core Types
