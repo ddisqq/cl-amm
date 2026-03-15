@@ -3,31 +3,80 @@
 
 (in-package :cl_amm)
 
-(defun init ()
-  "Initialize module."
+;;; ===================================================================
+;;; Global State
+;;; ===================================================================
+
+(defvar *pool-registry* (make-hash-table :test #'equal) "All pools by ID")
+(defvar *total-volume* 0 "Aggregate trading volume")
+
+;;; ===================================================================
+;;; Constants
+;;; ===================================================================
+
+(defconstant +min-liquidity+ 1000 "Minimum locked liquidity")
+(defconstant +bps-base+ 10000 "Basis points divisor")
+(defconstant +fee-bps-low+ 100 "0.01% fee (1 bps)")
+(defconstant +fee-bps-medium+ 300 "0.03% fee (3 bps)")
+(defconstant +fee-bps-high+ 1000 "0.1% fee (10 bps)")
+(defconstant +protocol-fee-ratio+ 6 "1/6 of swap fees go to protocol")
+
+;;; ===================================================================
+;;; Struct Definitions
+;;; ===================================================================
+
+(defstruct liquidity-pool
+  (id "" :type string)
+  (token-a "" :type string)
+  (token-b "" :type string)
+  (reserve-a 0 :type integer)
+  (reserve-b 0 :type integer)
+  (total-lp-shares 0 :type integer)
+  (fee-bps +fee-bps-medium+ :type integer)
+  (protocol-fee-bps 0 :type integer)
+  (accumulated-fees-a 0 :type integer)
+  (accumulated-fees-b 0 :type integer)
+  (created-at 0 :type integer)
+  (last-updated 0 :type integer))
+
+(defstruct swap-result
+  (amount-out 0 :type integer)
+  (fee-amount 0 :type integer)
+  (new-reserve-a 0 :type integer)
+  (new-reserve-b 0 :type integer)
+  (price-impact-bps 0 :type integer))
+
+(defstruct lp-share
+  (holder "" :type string)
+  (pool-id "" :type string)
+  (amount 0 :type integer))
+
+;;; ===================================================================
+;;; Imported Implementations (from amm.lisp)
+;;; ===================================================================
+
+(defun get-pool (pool-id)
+  "Get pool by ID or error."
+  (let ((pool (gethash pool-id *pool-registry*)))
+    (when (null pool)
+      (error 'pool-not-found-error :pool-id pool-id :message (format nil "Pool ~A not found" pool-id)))
+    pool))
+
+(defun register-pool (pool)
+  "Register a pool in the registry."
+  (setf (gethash (liquidity-pool-id pool) *pool-registry*) pool)
+  (liquidity-pool-id pool))
+
+(defun get-all-pools ()
+  "Get all registered pools."
+  (loop for pool being the hash-values of *pool-registry*
+        collect pool))
+
+(defun clear-registry ()
+  "Clear all pools."
+  (clrhash *pool-registry*)
+  (setf *total-volume* 0)
   t)
-
-(defun process (data)
-  "Process data."
-  (declare (type t data))
-  data)
-
-(defun status ()
-  "Get module status."
-  :ok)
-
-(defun validate (input)
-  "Validate input."
-  (declare (type t input))
-  t)
-
-(defun cleanup ()
-  "Cleanup resources."
-  t)
-
-
-;;; Substantive API Implementations
-(defun liquidity-pool (&rest args) "Auto-generated substantive API for liquidity-pool" (declare (ignore args)) t)
 (defstruct liquidity-pool (id 0) (metadata nil))
 (defun liquidity-pool-p (&rest args) "Auto-generated substantive API for liquidity-pool-p" (declare (ignore args)) t)
 (defun liquidity-pool-id (&rest args) "Auto-generated substantive API for liquidity-pool-id" (declare (ignore args)) t)
